@@ -1,13 +1,13 @@
-import { lazy, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { lazy, useEffect, useState } from "react";
 
 const PokemonListsPage = lazy(() => {
   return import("@/pokemonList");
 });
 function App() {
-  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const loader = document.getElementById("globalLoader");
+    if (loader) loader.remove();
+  }, []);
 
   return (
     <div>
