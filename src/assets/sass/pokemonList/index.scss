@@ -56,6 +56,53 @@
           }
         }
       }
+      .pokemon-region-kanto {
+        padding-top: 4px;
+        p {
+          font-size: 12px;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+}
+
+.header-section {
+  border: 1px solid $border-color;
+  height: 65px;
+  display: flex;
+  background-color: white;
+  .section-search {
+    width: 30%;
+    border-right: 1px solid $border-color;
+    height: 100%;
+    padding-left: 10px;
+    input {
+      height: 85%;
+      width: 95%;
+      border: none;
+      background-color: white;
+      &:focus {
+        outline: 0;
+      }
+    }
+  }
+  .section-filter {
+    // border: 1px solid red;
+    width: 70%;
+    display: flex;
+    padding-left: 10px;
+    div {
+      width: 33.33%;
+      height: 100%;
+      label {
+        font-size: 12px;
+      }
+      select {
+        width: 80%;
+        height: 50%;
+        border: 1px solid $border-color;
+      }
     }
   }
 }

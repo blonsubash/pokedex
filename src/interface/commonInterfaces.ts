@@ -3,6 +3,8 @@ export interface PokemonList {
   url: string;
   image?: string;
   types: PokemonTypes[];
+  habitat: string;
+  region: string;
 }
 
 export interface PokemonTypes {

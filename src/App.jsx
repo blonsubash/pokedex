@@ -1,7 +1,7 @@
 import { lazy, useEffect, useState } from "react";
 
 const PokemonListsPage = lazy(() => {
-  return import("@/pokemonList");
+  return import("@/pages/pokemonList");
 });
 function App() {
   useEffect(() => {
