@@ -1,7 +1,9 @@
-import { lazy, useEffect, useState } from "react";
+import { lazy, useEffect } from "react";
 
-const PokemonListsPage = lazy(() => {
-  return import("@/pages/pokemonList");
+import "./App.css";
+
+const MainRoutes = lazy(() => {
+  return import("@/pages");
 });
 function App() {
   useEffect(() => {
@@ -11,7 +13,7 @@ function App() {
 
   return (
     <div>
-      <PokemonListsPage />
+      <MainRoutes />
     </div>
   );
 }

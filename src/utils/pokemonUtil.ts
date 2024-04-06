@@ -18,11 +18,11 @@ import {
   FairyIcon,
   WaterIcon,
 } from "@/assets/images/pokemonType";
+import { PokemonTypeColors } from "@/constants/appConfig";
+import { PokemonTypeColorMap } from "@/interface";
 
-// Define a function to get the image components for given Pokémon types
-export function getPokemonTypeImages(type: string): JSX.Element[] {
-  // Map Pokémon types to their corresponding image components
-  const typeImageComponents = {
+export function getPokemonTypeImages(type: string | undefined) {
+  const typeImageComponents: any = {
     normal: NormalIcon,
     fighting: FightingIcon,
     flying: FlyingIcon,
@@ -43,18 +43,15 @@ export function getPokemonTypeImages(type: string): JSX.Element[] {
     fairy: FairyIcon,
   };
 
-  // Initialize an array to store image components
-  const typeImageComponentsArray: JSX.Element[] = [];
-
-  // Loop through each type in the types array
-
-  // const typeName = pokemonType.toLowerCase();
-  if (typeImageComponents[type]) {
-    typeImageComponentsArray.push(typeImageComponents[type]);
-  } else {
-    // If no image component found for the type, push a default image component or handle it as per your requirement
-    typeImageComponentsArray.push(NormalIcon); // You can define a default icon if needed
+  if (!type) {
+    return NormalIcon;
   }
 
-  return typeImageComponentsArray;
+  return typeImageComponents[type] || NormalIcon;
 }
+
+export const getColorForPokemonType = (
+  type: keyof PokemonTypeColorMap
+): string => {
+  return PokemonTypeColors[type] || "#333333";
+};

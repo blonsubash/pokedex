@@ -1,30 +1,83 @@
 import axios from "axios";
-import React, { FC, useEffect, useState } from "react";
-import RotateLoader from "react-spinners/RotateLoader";
+import { DotLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
+import { ChangeEvent, FC, useEffect, useState } from "react";
 
 import "@/assets/sass/pokemonList";
 
 import {
+  getColorForPokemonType,
   getNamePascalCase,
   getPokemonTypeImages,
   showToastError,
 } from "@/utils";
+import { PokemonList, PokemonTypes } from "@/interface";
 import { LIST_ALL_POKEMONS_URL } from "@/constants/apiConstants";
 
-import { PokemonList, PokemonTypes } from "@/interface";
-
 const PokemonLists: FC = () => {
+  const navigation = useNavigate();
   const [allPokemonLists, setAllPokemonLists] = useState<PokemonList[]>([]);
   const [allPokemonListsLoading, setAllPokemonListsLoading] =
     useState<boolean>(false);
   const [pokemonName, setPokemonName] = useState("");
   const [filteredPokemonList, setFilteredPokemonList] =
     useState(allPokemonLists);
-  const [habitatsList, setHabitatsList] = useState([]);
-  const [pokemonTypeList, setPokemonTypeList] = useState([]);
-  const [regionList, setRegionList] = useState([]);
-  const handlePokemonSearchByPokemonName = (e) => {
+  const [habitatsList, setHabitatsList] = useState<string[]>([]);
+  const [pokemonTypeList, setPokemonTypeList] = useState<string[]>([]);
+  const [regionList, setRegionList] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedHabitat, setSelectedHabitat] = useState<string>("");
+
+  const handlePokemonSearchByPokemonName = (
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
     setPokemonName(e.target.value);
+  };
+
+  const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedType = e.target.value;
+    setSelectedType(selectedType);
+    if (selectedType === "All") {
+      setFilteredPokemonList(allPokemonLists);
+    } else {
+      const filteredPokemon = allPokemonLists.filter((pokemon) =>
+        pokemon.types.includes(selectedType as any)
+      );
+      setFilteredPokemonList(filteredPokemon);
+    }
+  };
+
+  const handleRegionChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedRegion = e.target.value;
+    setSelectedRegion(selectedRegion);
+    if (selectedRegion === "All") {
+      setFilteredPokemonList(allPokemonLists);
+    } else {
+      const filteredPokemon = allPokemonLists.filter((pokemon) =>
+        pokemon.region.includes(selectedRegion)
+      );
+      setFilteredPokemonList(filteredPokemon);
+    }
+  };
+
+  const handleHabitatChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedHabitat = e.target.value;
+    setSelectedHabitat(selectedHabitat);
+    if (selectedHabitat === "All") {
+      setFilteredPokemonList(allPokemonLists);
+    } else {
+      const filteredPokemon = allPokemonLists.filter((pokemon) =>
+        pokemon.habitat.includes(selectedHabitat)
+      );
+      setFilteredPokemonList(filteredPokemon);
+    }
+  };
+
+  const navigateToPokemonDetailPage = (pokemonDetailUrl: string) => {
+    const pokemonSplitData = pokemonDetailUrl?.split("/");
+    const pokemonId = pokemonSplitData[pokemonSplitData.length - 2];
+    navigation(`/pokemon/${pokemonId}`);
   };
 
   useEffect(() => {
@@ -47,7 +100,7 @@ const PokemonLists: FC = () => {
 
         const habitats: string[] = [];
         const regions: string[] = [];
-        const pokemonTypesSet = new Set();
+        const pokemonTypesSet = new Set<string>();
 
         const pokemonWithDetails = await Promise.all(
           results?.map(async (pokemon: PokemonList) => {
@@ -90,7 +143,7 @@ const PokemonLists: FC = () => {
         setAllPokemonLists(pokemonWithDetails);
         setAllPokemonListsLoading(false);
         setHabitatsList(habitats);
-        setPokemonTypeList(Array.from(pokemonTypesSet));
+        setPokemonTypeList(Array.from(pokemonTypesSet) as string[]);
         setRegionList(regions);
       } catch (error) {
         setAllPokemonListsLoading(false);
@@ -100,61 +153,19 @@ const PokemonLists: FC = () => {
 
     fetchAllPokemon();
   }, []);
-  console.log("allPokemonLists", allPokemonLists);
-  console.log("regions", regionList);
-  console.log("typelist", pokemonTypeList);
-  console.log("habitat", habitatsList);
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedHabitat, setSelectedHabitat] = useState("");
-  const handleTypeChange = (e) => {
-    const selectedType = e.target.value;
-    setSelectedType(selectedType);
-    if (selectedType === "All") {
-      setFilteredPokemonList(allPokemonLists);
-    } else {
-      const filteredPokemon = allPokemonLists.filter((pokemon) =>
-        pokemon.types.includes(selectedType)
-      );
-      setFilteredPokemonList(filteredPokemon);
-    }
-  };
 
-  const handleRegionChange = (e) => {
-    const selectedRegion = e.target.value;
-    setSelectedRegion(selectedRegion);
-    if (selectedRegion === "All") {
-      setFilteredPokemonList(allPokemonLists);
-    } else {
-      const filteredPokemon = allPokemonLists.filter((pokemon) =>
-        pokemon.region.includes(selectedRegion)
-      );
-      setFilteredPokemonList(filteredPokemon);
-    }
-  };
-
-  const handleHabitatChange = (e) => {
-    const selectedHabitat = e.target.value;
-    setSelectedHabitat(selectedHabitat);
-    if (selectedHabitat === "All") {
-      setFilteredPokemonList(allPokemonLists);
-    } else {
-      const filteredPokemon = allPokemonLists.filter((pokemon) =>
-        pokemon.habitat.includes(selectedHabitat)
-      );
-      setFilteredPokemonList(filteredPokemon);
-    }
-  };
   return (
     <div className="pokemon-lists__container">
       {allPokemonListsLoading ? (
-        <RotateLoader
-          color={"#000000"}
-          loading={allPokemonListsLoading}
-          size={30}
-          aria-label="Loading Spinner"
-          data-testid="loader"
-        />
+        <div className="custom-loader">
+          <DotLoader
+            color={"#6750a4"}
+            loading={allPokemonListsLoading}
+            size={100}
+            aria-label="Loading..."
+            data-testid="loader"
+          />
+        </div>
       ) : (
         <div>
           <div className="header-section">
@@ -205,31 +216,29 @@ const PokemonLists: FC = () => {
 
           <div className="container__all-lists">
             {filteredPokemonList?.map((pokemon, index) => (
-              <div key={index} className="all-lists__pokemon-detail">
+              <div
+                key={index}
+                className="all-lists__pokemon-detail"
+                onClick={() => navigateToPokemonDetailPage(pokemon?.url)}
+              >
                 <img
                   src={pokemon?.image}
                   className="pokemon-detail__pokemon-img"
                 />
                 <h5>{getNamePascalCase(pokemon.name)}</h5>
                 <div className="pokemon-detail__types">
-                  {/* {pokemon.types.forEach((pokemontype) => (
-                  <p> {checkPokemontype(pokemontype)}</p>
-                ))} */}
-
-                  {/* {getPokemonTypeImages(pokemon.types).map(
-                  (typeImageSource, index) => (
-                    <React.Fragment key={index}>
-                      <img src={typeImageSource} />
-                    
-                    </React.Fragment>
-                  )
-                )} */}
-
-                  {/* <p>{checkPokemontype(pokemon.types)}</p> */}
-                  {pokemon.types.map((item, index) => (
-                    <div key={index} className="types__single-type">
-                      <img src={getPokemonTypeImages(item)} />
-                      <p>{getNamePascalCase(item)}</p>
+                  {pokemon?.types?.map((pokemonType, index) => (
+                    <div
+                      key={index}
+                      className="types__single-type"
+                      style={{
+                        backgroundColor: getColorForPokemonType(
+                          pokemonType as any
+                        ),
+                      }}
+                    >
+                      <img src={getPokemonTypeImages(pokemonType as any)} />
+                      <p>{getNamePascalCase(pokemonType as any)}</p>
                     </div>
                   ))}
                 </div>
