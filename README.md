@@ -11,7 +11,7 @@ Make sure you have npm or yarn installed on your machine.
 
 Installation:
 
-Step 1: Clone the repository to your local machine.
+Step 1: Clone the repository to your local machine.[ https://github.com/blonsubash/pokedex.git ]
 
 Step 2: Navigate to the project directory.
 
