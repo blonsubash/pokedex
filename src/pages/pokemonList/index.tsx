@@ -16,6 +16,7 @@ import { LIST_ALL_POKEMONS_URL } from "@/constants/apiConstants";
 
 const PokemonLists: FC = () => {
   const navigation = useNavigate();
+  const PAGE_SIZE = 50;
   const [allPokemonLists, setAllPokemonLists] = useState<PokemonList[]>([]);
   const [allPokemonListsLoading, setAllPokemonListsLoading] =
     useState<boolean>(false);
@@ -28,6 +29,8 @@ const PokemonLists: FC = () => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<string>("");
   const [selectedHabitat, setSelectedHabitat] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const handlePokemonSearchByPokemonName = (
     e: ChangeEvent<HTMLInputElement>
@@ -79,7 +82,9 @@ const PokemonLists: FC = () => {
     const pokemonId = pokemonSplitData[pokemonSplitData.length - 2];
     navigation(`/pokemon/${pokemonId}`);
   };
-
+  const loadMorePokemon = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
   useEffect(() => {
     if (pokemonName === "") {
       setFilteredPokemonList(allPokemonLists);
@@ -95,14 +100,19 @@ const PokemonLists: FC = () => {
     async function fetchAllPokemon() {
       try {
         setAllPokemonListsLoading(true);
-        const response = await axios.get(LIST_ALL_POKEMONS_URL);
+        const response = await axios.get(LIST_ALL_POKEMONS_URL, {
+          params: {
+            limit: PAGE_SIZE,
+            offset: (currentPage - 1) * PAGE_SIZE,
+          },
+        });
         const { results } = response.data;
 
         const habitats: string[] = [];
         const regions: string[] = [];
         const pokemonTypesSet = new Set<string>();
 
-        const pokemonWithDetails = await Promise.all(
+        const newPokemonList = await Promise.all(
           results?.map(async (pokemon: PokemonList) => {
             const pokemonResponse = await axios.get(pokemon.url);
             const speciesResponse = await axios.get(
@@ -140,11 +150,15 @@ const PokemonLists: FC = () => {
           })
         );
 
-        setAllPokemonLists(pokemonWithDetails);
+        setAllPokemonLists((prevPokemonList) => [
+          ...prevPokemonList,
+          ...newPokemonList,
+        ]);
         setAllPokemonListsLoading(false);
         setHabitatsList(habitats);
         setPokemonTypeList(Array.from(pokemonTypesSet) as string[]);
         setRegionList(regions);
+        setHasMore(newPokemonList.length === PAGE_SIZE);
       } catch (error) {
         setAllPokemonListsLoading(false);
         showToastError("Server Error. Please Try Again");
@@ -152,7 +166,7 @@ const PokemonLists: FC = () => {
     }
 
     fetchAllPokemon();
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="pokemon-lists__container">
@@ -253,6 +267,11 @@ const PokemonLists: FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+      {hasMore && !allPokemonListsLoading && (
+        <div className="load-more-btn-section">
+          <button onClick={loadMorePokemon}>Load More</button>
         </div>
       )}
     </div>
